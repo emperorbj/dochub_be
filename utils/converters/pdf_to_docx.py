@@ -1,16 +1,16 @@
 import os
 import pdfplumber
-import cloudinary
-import cloudinary.uploader
 import tempfile
 import asyncio
 from docx import Document
+from supabase import create_client
 
-cloudinary.config(
-    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET")
-)
+
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_KEY")
+supabase = create_client(supabase_url, supabase_key)
+
+BUCKET_NAME="docsbucket"
 
 async def convert_pdf_to_docx(file):
     contents = await file.read()
@@ -35,8 +35,25 @@ async def convert_pdf_to_docx(file):
         return tmp_path,docx_path
     
     tmp_path,docx_path = await asyncio.to_thread(_convert)
-    upload_result = cloudinary.uploader.upload(docx_path,resource_type="raw")
-    os.remove(tmp_path)
-    os.remove(docx_path)
     
-    return upload_result["secure_url"],os.path.basename(docx_path)
+    
+    try:
+        file_name = os.path.basename(docx_path)
+        with open(docx_path, "rb") as docx_file:
+            supabase.storage.from_(BUCKET_NAME).upload(
+                file_name,
+                docx_file,
+                {"content-type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "upsert": "false"}
+            )
+        download_url = f"{supabase_url}/storage/v1/object/public/{BUCKET_NAME}/{file_name}"
+        
+    except Exception as e:
+        print(f"❌ Supabase upload failed: {str(e)}")
+        raise
+    
+    finally:
+        os.remove(tmp_path)
+        os.remove(docx_path)
+
+    return download_url, file_name

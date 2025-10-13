@@ -1,16 +1,17 @@
 import asyncio
 import os
 import pdfplumber
-import cloudinary
-import cloudinary.uploader
 import tempfile
 import pandas as pd
+from supabase import create_client
 
-cloudinary.config(
-    cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET")
-)
+
+supabase_url = os.getenv("SUPABASE_URL")
+supabase_key = os.getenv("SUPABASE_KEY")
+supabase = create_client(supabase_url, supabase_key)
+
+BUCKET_NAME="docsbucket"
+
 
 async def convert_pdf_to_excel(file):
     contents= await file.read()
@@ -33,12 +34,25 @@ async def convert_pdf_to_excel(file):
         combined.to_excel(excel_path,index=False)
         
         return tmp_path, excel_path
-    
-    # Run the blocking conversion in a thread
     tmp_path, excel_path = await asyncio.to_thread(_convert)
     
-    upload_result = cloudinary.uploader.upload(excel_path,resource_type="raw")
-    os.remove(tmp_path)
-    os.remove(excel_path)
+    try:
+        file_name = os.path.basename(excel_path)
+        with open(excel_path, "rb") as excel_file:
+            supabase.storage.from_(BUCKET_NAME).upload(
+                file_name,
+                excel_file,
+                {"content-type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "upsert": "false"}
+            )
+        download_url = f"{supabase_url}/storage/v1/object/public/{BUCKET_NAME}/{file_name}"
     
-    return upload_result["secure_url"],os.path.basename(excel_path)
+    except Exception as e:
+        print(f"❌ Supabase upload failed: {str(e)}")
+        raise
+    
+    finally:
+        os.remove(tmp_path)
+        os.remove(excel_path)
+
+    return download_url, file_name
