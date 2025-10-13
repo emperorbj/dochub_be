@@ -21,8 +21,7 @@ class Users(BaseModel):
     last_name:str = Field(description="User's last name",min_length=1)
     email:str = Field(...,description="User's email")
     password:str = Field(...,description="User's password")
-    created_at: datetime  = Field(default_factory= lambda : datetime.now(timezone.utcnow()))
-    isVerified:Optional[None] = Field(description="User is verified",default=False)
+    created_at:datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     
     
     class Config:
@@ -39,7 +38,6 @@ class UserResponse(BaseModel):
     first_name:str
     last_name:str
     email:str
-    isVerified:bool
     
     
     class Config:

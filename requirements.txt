@@ -1,0 +1,34 @@
+# 🌐 FastAPI & Server
+fastapi
+fastapi[standard]
+
+# 🗄️ Database - MongoDB
+motor
+pymongo
+python-dotenv
+
+# 🔐 Authentication & Security
+pyjwt
+bcrypt
+passlib[bcrypt]
+
+# 🧰 Utilities
+pydantic
+python-multipart
+requests
+
+# ☁️ Cloudinary integration
+cloudinary
+
+# 🧾 File Conversion Tools
+pdfplumber
+PyPDF2
+pandas
+openpyxl
+xlrd
+reportlab
+python-docx
+
+# 🧪 Optional (useful for async API calls)
+httpx
+

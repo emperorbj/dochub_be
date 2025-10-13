@@ -4,9 +4,9 @@ import os
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
-DB_NAME = "Blogging"
-COLLECTION_NAME = "users"
-BOOK_COLLECTION = "books"
+DB_NAME = "dochubDB"
+USER_COLLECTION = "users"
+FILE_COLLECTION="converted_file"
 
 client = None
 
@@ -26,11 +26,11 @@ async def close_db():
         client.close()
         print("MongoDB connection closed.")
 
-def get_collection():
-    return client[DB_NAME][COLLECTION_NAME]
+def get_user_collection():
+    return client[DB_NAME][USER_COLLECTION]
 
 
-def get_book_collection():
-    return client[DB_NAME][BOOK_COLLECTION]
+def get_file_collection():
+    return client[DB_NAME][FILE_COLLECTION]
 
 

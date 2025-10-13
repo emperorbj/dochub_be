@@ -3,27 +3,18 @@ from cryptography.fernet import Fernet
 import os
 from dotenv import load_dotenv
 from models.user import Users,UserResponse,LoginUser
-from config import get_collection
+from config import get_user_collection
 import bcrypt
-
+from utils.auth import create_access_token
 
 load_dotenv()
 
 signup_root = APIRouter()
-# key = os.getenv("FERNET_KEY").encode()
-# # key = Fernet.generate_key()
-# print(key)
-
-# cipher = Fernet(key)
-
-
-
-
 
 @signup_root.post("/api/signup")
 async def sign_up(user:Users,response_model = UserResponse ):
     
-    collection = get_collection()
+    collection = get_user_collection()
     
     # crypted_first_name = cipher.encrypt(user.first_name.encode()).decode()
     # crypted_last_name = cipher.encrypt(user.last_name.encode()).decode()
@@ -34,7 +25,6 @@ async def sign_up(user:Users,response_model = UserResponse ):
        "last_name":user.last_name,
        "email":user.email,
        "password":crypted_password,
-       "isVerified":user.isVerified,
        "created_at":user.created_at
     }
     
@@ -53,7 +43,7 @@ async def sign_up(user:Users,response_model = UserResponse ):
 
 @signup_root.post("/api/login")
 async def login(user:LoginUser, response_model = UserResponse):
-    collection = get_collection()
+    collection = get_user_collection()
     login_user = await collection.find_one({"email":user.email})
     
     if not login_user:
@@ -69,10 +59,11 @@ async def login(user:LoginUser, response_model = UserResponse):
         "last_name": login_user["last_name"],
         "email": login_user["email"],
         "created_at": login_user["created_at"],
-        "isVerified": login_user["isVerified"]
     }
     
-   
+    token = create_access_token(str(login_user["_id"]))
     
-    
-    return UserResponse(**response_data)
+    return {
+        "user":UserResponse(**response_data),
+        "token":token
+    }
