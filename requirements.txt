@@ -30,6 +30,8 @@ reportlab
 python-docx
 supabase
 pdf2image
+python-pptx
+markdown
 
 # 🧪 Optional (useful for async API calls)
 httpx
