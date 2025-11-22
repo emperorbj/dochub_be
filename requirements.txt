@@ -28,6 +28,7 @@ openpyxl
 xlrd
 reportlab
 python-docx
+supabase
 
 # 🧪 Optional (useful for async API calls)
 httpx
