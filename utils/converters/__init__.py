@@ -8,6 +8,7 @@ from .compress_pdf import convert_compress_pdf
 from .extract_pdf_text import convert_extract_pdf_text
 from .markdown_to_pdf import convert_markdown_to_pdf
 from .pdf_to_powerpoint import convert_pdf_to_powerpoint
+from .extract_zip import convert_extract_zip
 
 conversion_map = {
     "docx_to_pdf":convert_docx_to_pdf,
@@ -19,7 +20,8 @@ conversion_map = {
     "compress_pdf":convert_compress_pdf,
     "extract_pdf_text":convert_extract_pdf_text,
     "markdown_to_pdf":convert_markdown_to_pdf,
-    "pdf_to_powerpoint":convert_pdf_to_powerpoint
+    "pdf_to_powerpoint":convert_pdf_to_powerpoint,
+    "extract_zip":convert_extract_zip
 }
 
 

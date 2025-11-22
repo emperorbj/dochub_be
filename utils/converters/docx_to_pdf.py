@@ -1,8 +1,6 @@
 import asyncio
 import os
 import pdfplumber
-import cloudinary
-import cloudinary.uploader
 import tempfile
 from docx import Document
 from reportlab.pdfgen import canvas

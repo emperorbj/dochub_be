@@ -2,8 +2,6 @@ from fastapi import FastAPI
 from routes.entry import entry_root
 from routes.signup import signup_root
 from routes.files import files_router
-
-
 from config import init_db, close_db
 from contextlib import asynccontextmanager
 
