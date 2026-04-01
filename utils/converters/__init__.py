@@ -1,32 +1,34 @@
-from .docx_to_pdf import convert_docx_to_pdf
-from .excel_to_json import convert_excel_to_json
-from .pdf_to_csv import convert_pdf_to_csv
-from .pdf_to_docx import convert_pdf_to_docx
-from .pdf_to_excel import convert_pdf_to_excel
-from .image_to_pdf import convert_image_to_pdf
-from .compress_pdf import convert_compress_pdf
-from .extract_pdf_text import convert_extract_pdf_text
-from .markdown_to_pdf import convert_markdown_to_pdf
-from .pdf_to_powerpoint import convert_pdf_to_powerpoint
-from .extract_zip import convert_extract_zip
+import importlib
+from typing import Any, Callable, Awaitable
 
-conversion_map = {
-    "docx_to_pdf":convert_docx_to_pdf,
-    "excel_to_json":convert_excel_to_json,
-    "pdf_to_csv":convert_pdf_to_csv,
-    "pdf_to_docx":convert_pdf_to_docx,
-    "pdf_to_excel":convert_pdf_to_excel,
-    "image_to_pdf":convert_image_to_pdf,
-    "compress_pdf":convert_compress_pdf,
-    "extract_pdf_text":convert_extract_pdf_text,
-    "markdown_to_pdf":convert_markdown_to_pdf,
-    "pdf_to_powerpoint":convert_pdf_to_powerpoint,
-    "extract_zip":convert_extract_zip
+# Lazy-loaded converters: (module_path, function_name)
+CONVERSION_MODULES: dict[str, tuple[str, str]] = {
+    "docx_to_pdf": ("utils.converters.docx_to_pdf", "convert_docx_to_pdf"),
+    "excel_to_json": ("utils.converters.excel_to_json", "convert_excel_to_json"),
+    "pdf_to_csv": ("utils.converters.pdf_to_csv", "convert_pdf_to_csv"),
+    "pdf_to_docx": ("utils.converters.pdf_to_docx", "convert_pdf_to_docx"),
+    "pdf_to_excel": ("utils.converters.pdf_to_excel", "convert_pdf_to_excel"),
+    "image_to_pdf": ("utils.converters.image_to_pdf", "convert_image_to_pdf"),
+    "compress_pdf": ("utils.converters.compress_pdf", "convert_compress_pdf"),
+    "extract_pdf_text": ("utils.converters.extract_pdf_text", "convert_extract_pdf_text"),
+    "markdown_to_pdf": ("utils.converters.markdown_to_pdf", "convert_markdown_to_pdf"),
+    "pdf_to_powerpoint": ("utils.converters.pdf_to_powerpoint", "convert_pdf_to_powerpoint"),
+    "extract_zip": ("utils.converters.extract_zip", "convert_extract_zip"),
 }
 
 
-async def convert_file(file,conversion_type:str):
-    if conversion_type not in conversion_map:
+def is_supported_conversion(conversion_type: str) -> bool:
+    return conversion_type in CONVERSION_MODULES
+
+
+def supported_conversion_types() -> frozenset[str]:
+    return frozenset(CONVERSION_MODULES.keys())
+
+
+async def convert_file(file: Any, conversion_type: str):
+    if conversion_type not in CONVERSION_MODULES:
         raise ValueError(f"Unsupported file type for : {conversion_type}")
-    
-    return await conversion_map[conversion_type](file)
+    module_path, fn_name = CONVERSION_MODULES[conversion_type]
+    mod = importlib.import_module(module_path)
+    fn: Callable[..., Awaitable[Any]] = getattr(mod, fn_name)
+    return await fn(file)

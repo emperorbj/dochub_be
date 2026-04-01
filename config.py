@@ -6,7 +6,8 @@ load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = "dochubDB"
 USER_COLLECTION = "users"
-FILE_COLLECTION="converted_file"
+FILE_COLLECTION = "converted_file"
+JOBS_COLLECTION = "conversion_jobs"
 
 client = None
 
@@ -33,4 +34,7 @@ def get_user_collection():
 def get_file_collection():
     return client[DB_NAME][FILE_COLLECTION]
 
+
+def get_jobs_collection():
+    return client[DB_NAME][JOBS_COLLECTION]
 

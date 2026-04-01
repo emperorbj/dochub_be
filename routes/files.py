@@ -2,8 +2,8 @@ from bson import ObjectId
 import cloudinary
 from fastapi import UploadFile,File,HTTPException,Depends,APIRouter,Form
 from utils.auth import get_current_user
-from services.file_service import delete_file, get_file_by_id, get_user_files,save_file_record
-from utils.converters import convert_file
+from services.file_service import delete_file, get_file_by_id, get_user_files
+from services.job_service import enqueue_conversion_job
 
 files_router = APIRouter()
 
@@ -14,34 +14,25 @@ async def convert_documents(
     current_user:dict = Depends(get_current_user)
     ):
     """
-    Upload a file and convert it based on the conversion_type.
-    Supported types: pdf_to_excel, excel_to_json, pdf_to_docx, docx_to_pdf
+    Queue a file conversion (same as POST /api/convert/jobs).
+    Poll GET /api/jobs/{job_id} until status is done or failed; then the result is in job.file_record.
     """
     try:
-        converted_url,new_filename = await convert_file(file,conversion_type)
-        
-        record = await save_file_record(
-            user_id=current_user["_id"],
-            original_filename=file.filename,
-            converted_filename=new_filename,
-            file_type=file.content_type,
-            conversion_type=conversion_type,
-            cloud_url=converted_url
-        )
+        job = await enqueue_conversion_job(current_user, file, conversion_type)
         return {
-            "success":True,
-            "message": f"File converted successfully to {conversion_type}",
-            "file":record
+            "success": True,
+            "message": "Conversion queued. Poll GET /api/jobs/{job_id} for status.",
+            "job": job,
         }
-        
+
     except ValueError as e:
         # For known conversion errors
         raise HTTPException(
             status_code=400,
             detail=str(e)
         )
-        
-        
+
+
     except Exception as e:
         raise HTTPException(
             status_code=400,
