@@ -4,11 +4,11 @@ import tempfile
 from PIL import Image
 from supabase import create_client
 
+from config import SUPABASE_BUCKET_NAME as BUCKET_NAME
+
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key)
-
-BUCKET_NAME = "docsbucket"
 
 
 

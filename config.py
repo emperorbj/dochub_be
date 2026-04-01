@@ -4,6 +4,8 @@ import os
 
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
+# Supabase Storage bucket (must exist in your Supabase project; override with SUPABASE_BUCKET).
+SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET", "docsbucket")
 DB_NAME = "dochubDB"
 USER_COLLECTION = "users"
 FILE_COLLECTION = "converted_file"

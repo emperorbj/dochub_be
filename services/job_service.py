@@ -8,13 +8,12 @@ from bson import ObjectId
 from pymongo import ReturnDocument
 from supabase import create_client
 
-from config import get_jobs_collection
+from config import SUPABASE_BUCKET_NAME, get_jobs_collection
 from utils.converters import is_supported_conversion
 from utils.upload_stream import stream_upload_to_temp
 
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-BUCKET_NAME = os.getenv("SUPABASE_BUCKET", "docsbucket")
 DEFAULT_MAX_UPLOAD_MB = int(os.getenv("MAX_UPLOAD_MB", "50"))
 
 
@@ -63,7 +62,7 @@ async def enqueue_conversion_job(
 
     try:
         with open(local_path, "rb") as f:
-            _supabase().storage.from_(BUCKET_NAME).upload(
+            _supabase().storage.from_(SUPABASE_BUCKET_NAME).upload(
                 remote_key,
                 f,
                 {
@@ -175,7 +174,7 @@ async def mark_job_completed(
 
 
 def download_input_file(storage_path: str) -> bytes:
-    return _supabase().storage.from_(BUCKET_NAME).download(storage_path)
+    return _supabase().storage.from_(SUPABASE_BUCKET_NAME).download(storage_path)
 
 
 async def remove_input_from_storage(storage_path: str) -> None:
@@ -186,6 +185,6 @@ async def remove_input_from_storage(storage_path: str) -> None:
     ):
         return
     try:
-        _supabase().storage.from_(BUCKET_NAME).remove([storage_path])
+        _supabase().storage.from_(SUPABASE_BUCKET_NAME).remove([storage_path])
     except Exception:
         pass

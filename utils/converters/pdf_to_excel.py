@@ -5,12 +5,12 @@ import tempfile
 import pandas as pd
 from supabase import create_client
 
+from config import SUPABASE_BUCKET_NAME as BUCKET_NAME
+
 
 supabase_url = os.getenv("SUPABASE_URL")
 supabase_key = os.getenv("SUPABASE_KEY")
 supabase = create_client(supabase_url, supabase_key)
-
-BUCKET_NAME="docsbucket"
 
 
 async def convert_pdf_to_excel(file):
